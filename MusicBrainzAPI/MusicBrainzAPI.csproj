@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
-    <Compile Include="Domain\Album.cs" />
+    <Compile Include="AudioObjects\Album.cs" />
     <Compile Include="Domain\BaseDomainObject.cs" />
     <Compile Include="Domain\IGetServices.cs" />
     <Compile Include="Domain\Recording.cs" />
