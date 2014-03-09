@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioObjects\Song.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="AudioObjects\Album.cs" />
     <Compile Include="Domain\BaseDomainObject.cs" />

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MusicBrainzAPI.Domain
+namespace MusicBrainzAPI.AudioObjects
 {
     public enum Status
 	{
@@ -25,6 +25,8 @@ namespace MusicBrainzAPI.Domain
         public string Country { get; set; }
         public string ArtistName { get; set; }
         public List<ReleaseType> ReleaseTypes { get; set; }
+        public string Format { get; set; }
+        public byte TrackCount { get; set; }
 
         public Album()
         {
