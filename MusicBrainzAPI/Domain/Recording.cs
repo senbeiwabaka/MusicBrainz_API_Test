@@ -11,7 +11,6 @@ namespace MusicBrainzAPI.Domain
     public class Recording : BaseDomainObject
     {
         public XmlDocument XmlDocument { get; private set; }
-        public IList<string> Generes { get; set; }
 
         public Recording(string artist = "", string album = "", string songTitle = "")
             : this(Configuration.BaseURL, "test", "test", "test") { }
