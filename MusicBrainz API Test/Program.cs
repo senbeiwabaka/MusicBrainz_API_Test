@@ -11,9 +11,19 @@ namespace MusicBrainz_API_Test
     {
         static void Main(string[] args)
         {
-            Recording recording = new Recording("Atreyu", "The Curse", "Right side of the bed");
+            Recording recording = new Recording();
 
-            Console.WriteLine(recording.XmlDocument.OuterXml);
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
+            sw.Start();
+
+            recording.Get(string.Empty, "Atreyu", "The Curse", "Right side of the bed");
+
+            sw.Stop();
+
+            Console.WriteLine("Elapsed time in milliseconds: {0}", sw.ElapsedMilliseconds);
+
+            Console.ReadLine();
         }
     }
 }

@@ -1,21 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace MusicBrainzAPI.AudioObjects
 {
-    public enum Status
-	{
-        BootLeg,
-        Official,
-        Pseudo_Release,
-        Promotional,
-        None
-	}
-
     public enum ReleaseType
-	{
+    {
         Album,
         Audiobook,
         Compilation,
@@ -30,27 +19,49 @@ namespace MusicBrainzAPI.AudioObjects
         Soundtrack,
         Spokenword,
         None
-	}
+    }
+
+    public enum Status
+    {
+        BootLeg,
+        Official,
+        Pseudo_Release,
+        Promotion,
+        None
+    }
 
     public class Album
     {
-        public string Title { get; set; }
-        public Status Status { get; set; }
-        public DateTime ReleasedDate { get; set; }
-        public string Country { get; set; }
-        public string ArtistName { get; set; }
-        public List<ReleaseType> ReleaseTypes { get; set; }
-        public string Format { get; set; }
-        public byte TrackCount { get; set; }
-        public string RecordLabel { get; set; }
-        public IList<string> ListofAlbumGenres { get; set; }
+        public readonly Guid ID;
 
-        public Album()
+        public Album(Guid id = new Guid())
         {
-            Title = string.Empty;
             Status = Status.None;
             ReleasedDate = DateTime.Now;
-
+            ID = id;
+            ReleaseTypes = new List<ReleaseType>();
+            ListofAlbumGenres = new List<string>();
+            Artists = new List<Artist>();
         }
+
+        public IList<Artist> Artists { get; set; }
+
+        public string Country { get; set; }
+
+        public string Format { get; set; }
+
+        public IList<string> ListofAlbumGenres { get; set; }
+
+        public string RecordLabel { get; set; }
+
+        public DateTime ReleasedDate { get; set; }
+
+        public IList<ReleaseType> ReleaseTypes { get; set; }
+
+        public Status Status { get; set; }
+
+        public string Title { get; set; }
+
+        public byte TrackCount { get; set; }
     }
 }
