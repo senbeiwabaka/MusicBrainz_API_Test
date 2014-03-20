@@ -8,7 +8,6 @@ namespace MusicBrainzAPI.Domain
 {
     public class BaseDomainObject
     {
-        public string URL { get; set; }
-
+        protected readonly string _baseURL = "http://musicbrainz.org/ws/2/";
     }
 }

@@ -2,16 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Xml;
 
 namespace MusicBrainzAPI.Domain
 {
     public class Recording : BaseDomainObject
     {
-        private XmlDocument XmlDocument { get; set; }
+        private XmlDocument _xmlDocument = null;
+        private string _artist = null;
+        private string _album = null;
+        private string _songTitle = null;
 
         public IList<Song> Songs { get; set; }
         
@@ -20,15 +21,26 @@ namespace MusicBrainzAPI.Domain
             Songs = new List<Song>();
         }
 
-        public bool Get(string baseURL = "", string artist = "", string album = "", string songTitle = "")
+        public bool SearchGet(string baseURL = "", string artist = "", string album = "", string songTitle = "")
         {
+            if (string.IsNullOrEmpty(baseURL))
+            {
+                baseURL = _baseURL;
+            }
+
+            _artist = artist;
+            _album = album;
+            _songTitle = songTitle;
+
+            string value = baseURL + Configuration.Recording + "\"" + songTitle + "\"" +
+                    (!string.IsNullOrEmpty(artist) ? " AND artist:" + artist : string.Empty) +
+                    (!string.IsNullOrEmpty(album) ? " AND release:" + album : string.Empty);
+
             try
             {
-                if (string.IsNullOrEmpty(baseURL))
-                {
-                    baseURL = "http://musicbrainz.org/ws/2/";
-                }
-                WebRequest request = WebRequest.Create(baseURL + Configuration.Recording + "\"" + songTitle + "\" AND artist:" + artist + " AND release:" + album);
+                WebRequest request = WebRequest.Create(baseURL + Configuration.Recording + "\"" + songTitle + "\"" +
+                    (!string.IsNullOrEmpty(artist) ? " AND artist:" + artist : string.Empty) +
+                    (!string.IsNullOrEmpty(album) ? " AND release:" + album : string.Empty));
 
                 request.Method = "GET";
 
@@ -38,8 +50,8 @@ namespace MusicBrainzAPI.Domain
                 {
                     using (Stream stream = response.GetResponseStream())
                     {
-                        XmlDocument = new XmlDocument();
-                        XmlDocument.Load(stream);
+                        _xmlDocument = new XmlDocument();
+                        _xmlDocument.Load(stream);
 
                         Setup();
                     }
@@ -55,47 +67,64 @@ namespace MusicBrainzAPI.Domain
 
         private void Setup()
         {
-            XmlNamespaceManager namespaceManager = new XmlNamespaceManager(XmlDocument.NameTable);
-            foreach (XmlNode recording in XmlDocument.GetElementsByTagName("recording"))
+            XmlNamespaceManager namespaceManager = new XmlNamespaceManager(_xmlDocument.NameTable);
+            foreach (XmlNode recording in _xmlDocument.GetElementsByTagName("recording"))
             {
                 // song setup
-                Song song = new Song(Convert.ToInt32(recording.Attributes["ext:score"].Value),Guid.Parse(recording.Attributes["id"].Value));
-
-                song.SongTitle = recording.ChildNodes[0].InnerText;
-
-                song.SongLength = Convert.ToInt64(recording.ChildNodes[1].InnerText);
-
-                // artist setup
-                Artist songArtist = new Artist(Guid.Parse(recording.ChildNodes[2].ChildNodes[0].ChildNodes[0].Attributes["id"].Value)) 
-                { 
-                    ArtistName = recording.ChildNodes[2].ChildNodes[0].ChildNodes[0].ChildNodes[0].InnerText 
+                Song song = new Song(Convert.ToInt32(recording.Attributes["ext:score"].Value), Guid.Parse(recording.Attributes["id"].Value))
+                {
+                    SongTitle = recording.ChildNodes[0].InnerText.Trim(),
+                    
                 };
 
-                var something = recording.SelectSingleNode("/release*");
-                Console.WriteLine(something);
-
-                // album(s) setup
-                foreach (XmlNode release in recording.ChildNodes[3])
+                foreach (XmlElement element in recording.ChildNodes)
                 {
-                    Album album = new Album(Guid.Parse(release.Attributes["id"].Value))
+                    switch (element.Name.Trim().ToLowerInvariant())
                     {
-                        Title = release.ChildNodes[0].InnerText,
-                        Status = (Status)Enum.Parse(typeof(Status), release.ChildNodes[1].InnerText)
-                    };
+                        case "length":
+                            song.SongLength = Convert.ToInt64(element.InnerText);
+                            break;
+                        case "artist-credit":
+                            // artist setup
+                            Artist songArtist = ArtistSetup(element);
+                            song.Artists.Add(songArtist);
+                            break;
+                        case "release-list":
+                            // album(s) setup
+                            foreach (XmlNode release in element)
+                            {
+                                Album album = new Album(Guid.Parse(release.Attributes["id"].Value))
+                                {
+                                    Title = release.ChildNodes[0].InnerText.Trim(),
+                                    Status = (Status)Enum.Parse(typeof(Status), release.ChildNodes[1].InnerText)
+                                };
 
-                    album.Artists.Add(songArtist);
-
-                    song.Albums.Add(album);
+                                song.Albums.Add(album);
+                            }
+                            break;
+                        case "tag-list":
+                            // song tag setup
+                            foreach (XmlNode tag in element)
+                            {
+                                song.ListofSongGenres.Add(tag.InnerText);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
-                song.Artists.Add(songArtist);
-
-                // song tag setup
-                foreach (XmlNode tag in recording.ChildNodes[4])
-                {
-                    song.ListofSongGenres.Add(tag.InnerText);
-                }
+                Songs.Add(song);
             }
+        }
+
+        private static Artist ArtistSetup(XmlElement artist)
+        {
+            Artist songArtist = new Artist(Guid.Parse(artist.ChildNodes[0].ChildNodes[0].Attributes["id"].Value))
+            {
+                ArtistName = artist.ChildNodes[0].ChildNodes[0].ChildNodes[0].InnerText.Trim()
+            };
+            return songArtist;
         }
     }
 }

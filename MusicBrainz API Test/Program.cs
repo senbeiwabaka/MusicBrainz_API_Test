@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using MusicBrainzAPI;
 using MusicBrainzAPI.Domain;
+using MusicBrainzAPI.AudioObjects;
 
 namespace MusicBrainz_API_Test
 {
@@ -17,11 +18,16 @@ namespace MusicBrainz_API_Test
 
             sw.Start();
 
-            recording.Get(string.Empty, "Atreyu", "The Curse", "Right side of the bed");
+            recording.SearchGet(string.Empty, "Atreyu", "The Curse", "\"Right side of the bed\"");
 
             sw.Stop();
 
-            Console.WriteLine("Elapsed time in milliseconds: {0}", sw.ElapsedMilliseconds);
+            Console.WriteLine("Elapsed time in milliseconds: {0} ; For a total count of {1}", sw.ElapsedMilliseconds, recording.Songs.Count);
+
+            foreach (Song song in recording.Songs)
+            {
+                Console.WriteLine(song.ToString());
+            }
 
             Console.ReadLine();
         }

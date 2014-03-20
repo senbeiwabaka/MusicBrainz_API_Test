@@ -23,7 +23,7 @@ namespace MusicBrainzAPI.AudioObjects
 
     public enum Status
     {
-        BootLeg,
+        Bootleg,
         Official,
         Pseudo_Release,
         Promotion,
