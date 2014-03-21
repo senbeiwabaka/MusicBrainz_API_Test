@@ -18,7 +18,7 @@ namespace MusicBrainz_API_Test
 
             sw.Start();
 
-            recording.SearchGet(string.Empty, "Atreyu", "The Curse", "\"Right side of the bed\"");
+            recording.SearchGet(string.Empty, "\"right side of the bed\"");
 
             sw.Stop();
 
@@ -27,6 +27,13 @@ namespace MusicBrainz_API_Test
             foreach (Song song in recording.Songs)
             {
                 Console.WriteLine(song.ToString());
+
+                Console.WriteLine("--------------------------------------");
+
+                foreach (Album album in song.Albums)
+                {
+                    Console.WriteLine("\t" + album.ToString());
+                }
             }
 
             Console.ReadLine();

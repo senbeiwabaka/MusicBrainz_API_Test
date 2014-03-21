@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace MusicBrainzAPI.AudioObjects
 {
+    /// <summary>
+    /// The album release type such as album or EP
+    /// </summary>
     public enum ReleaseType
     {
         Album,
@@ -21,6 +24,9 @@ namespace MusicBrainzAPI.AudioObjects
         None
     }
 
+    /// <summary>
+    /// The status of the album such as official or promotion
+    /// </summary>
     public enum Status
     {
         Bootleg,
@@ -30,6 +36,9 @@ namespace MusicBrainzAPI.AudioObjects
         None
     }
 
+    /// <summary>
+    /// This class is the "Release" of MusicBrainz
+    /// </summary>
     public class Album
     {
         public readonly Guid ID;
@@ -39,9 +48,9 @@ namespace MusicBrainzAPI.AudioObjects
             Status = Status.None;
             ReleasedDate = DateTime.Now;
             ID = id;
-            ReleaseTypes = new List<ReleaseType>();
-            ListofAlbumGenres = new List<string>();
             Artists = new List<Artist>();
+            PrimaryType = ReleaseType.None;
+            SecondaryType = ReleaseType.None;
         }
 
         public IList<Artist> Artists { get; set; }
@@ -50,18 +59,27 @@ namespace MusicBrainzAPI.AudioObjects
 
         public string Format { get; set; }
 
-        public IList<string> ListofAlbumGenres { get; set; }
-
         public string RecordLabel { get; set; }
 
         public DateTime ReleasedDate { get; set; }
-
-        public IList<ReleaseType> ReleaseTypes { get; set; }
 
         public Status Status { get; set; }
 
         public string Title { get; set; }
 
         public byte TrackCount { get; set; }
+
+        public string AmazonASIN { get; set; }
+
+        public ReleaseType PrimaryType { get; set; }
+
+        public ReleaseType SecondaryType { get; set; }
+
+        public int TrackPosition { get; set; }
+
+        public override string ToString()
+        {
+            return "Album Title: " + Title + " ; Country: " + Country + " ; Status: " + Status.ToString();
+        }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace MusicBrainzAPI.AudioObjects
 {
     /// <summary>
-    /// This class is the "Release" of MusicBrainz
+    /// This class is the "Recording" of MusicBrainz
     /// </summary>
     public class Song
     {
@@ -28,9 +28,19 @@ namespace MusicBrainzAPI.AudioObjects
         /// </summary>
         public IList<Album> Albums { get; set; }
 
-
+        /// <summary>
+        /// The list of artists that this song my pertain to
+        /// </summary>
         public IList<Artist> Artists { get; set; }
+
+        /// <summary>
+        /// The DB ID of the song in MusicBrainz
+        /// </summary>
         public readonly Guid ID;
+
+        /// <summary>
+        /// The "percent" match this song is to the specified song (used in search)
+        /// </summary>
         public readonly int MatchScore;
 
         public Song(int matchScore = 0, Guid id = new Guid())

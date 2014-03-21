@@ -7,12 +7,9 @@ using System.Xml;
 
 namespace MusicBrainzAPI.Domain
 {
-    public class Recording : BaseDomainObject
+    public class Recording : BaseDomainObject, IServices
     {
         private XmlDocument _xmlDocument = null;
-        private string _artist = null;
-        private string _album = null;
-        private string _songTitle = null;
 
         public IList<Song> Songs { get; set; }
         
@@ -21,26 +18,17 @@ namespace MusicBrainzAPI.Domain
             Songs = new List<Song>();
         }
 
-        public bool SearchGet(string baseURL = "", string artist = "", string album = "", string songTitle = "")
+        public bool SearchGet(string baseURL = "", string query = "")
         {
             if (string.IsNullOrEmpty(baseURL))
             {
                 baseURL = _baseURL;
             }
-
-            _artist = artist;
-            _album = album;
-            _songTitle = songTitle;
-
-            string value = baseURL + Configuration.Recording + "\"" + songTitle + "\"" +
-                    (!string.IsNullOrEmpty(artist) ? " AND artist:" + artist : string.Empty) +
-                    (!string.IsNullOrEmpty(album) ? " AND release:" + album : string.Empty);
+            string url = baseURL + Configuration.Recording + query;
 
             try
             {
-                WebRequest request = WebRequest.Create(baseURL + Configuration.Recording + "\"" + songTitle + "\"" +
-                    (!string.IsNullOrEmpty(artist) ? " AND artist:" + artist : string.Empty) +
-                    (!string.IsNullOrEmpty(album) ? " AND release:" + album : string.Empty));
+                WebRequest request = WebRequest.Create(url);
 
                 request.Method = "GET";
 
@@ -53,7 +41,7 @@ namespace MusicBrainzAPI.Domain
                         _xmlDocument = new XmlDocument();
                         _xmlDocument.Load(stream);
 
-                        Setup();
+                        SearchSetup();
                     }
                 }
             }
@@ -65,7 +53,17 @@ namespace MusicBrainzAPI.Domain
             return true;
         }
 
-        private void Setup()
+        public bool Get(string baseURL = "", string query = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Sets up the list of songs returned from search
+        /// </summary>
+        private void SearchSetup()
         {
             XmlNamespaceManager namespaceManager = new XmlNamespaceManager(_xmlDocument.NameTable);
             foreach (XmlNode recording in _xmlDocument.GetElementsByTagName("recording"))
@@ -86,21 +84,11 @@ namespace MusicBrainzAPI.Domain
                             break;
                         case "artist-credit":
                             // artist setup
-                            Artist songArtist = ArtistSetup(element);
-                            song.Artists.Add(songArtist);
+                            song.Artists.Add(ArtistSetup(element));
                             break;
                         case "release-list":
                             // album(s) setup
-                            foreach (XmlNode release in element)
-                            {
-                                Album album = new Album(Guid.Parse(release.Attributes["id"].Value))
-                                {
-                                    Title = release.ChildNodes[0].InnerText.Trim(),
-                                    Status = (Status)Enum.Parse(typeof(Status), release.ChildNodes[1].InnerText)
-                                };
-
-                                song.Albums.Add(album);
-                            }
+                            AlbumSetup(song, element);
                             break;
                         case "tag-list":
                             // song tag setup
@@ -118,6 +106,52 @@ namespace MusicBrainzAPI.Domain
             }
         }
 
+        private static void AlbumSetup(Song song, XmlElement element)
+        {
+            foreach (XmlNode release in element)
+            {
+                Album album = new Album(Guid.Parse(release.Attributes["id"].Value));
+
+                foreach (XmlElement releaseElement in release)
+                {
+                    switch (releaseElement.Name.Trim().ToLowerInvariant())
+                    {
+                        case "title":
+                            album.Title = releaseElement.InnerText.Trim();
+                            break;
+                        case "status":
+                            album.Status = (Status)Enum.Parse(typeof(Status), releaseElement.InnerText);
+                            break;
+                        case "release-group":
+
+                            break;
+                        case "date":
+                            //album.ReleasedDate = DateTime.Parse(release.InnerText);
+                            break;
+                        case "country":
+                            album.Country = releaseElement.InnerText;
+                            break;
+                        case "medium-list":
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(release.ChildNodes[1].InnerText))
+                {
+                    
+                }
+
+                song.Albums.Add(album);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="artist"></param>
+        /// <returns></returns>
         private static Artist ArtistSetup(XmlElement artist)
         {
             Artist songArtist = new Artist(Guid.Parse(artist.ChildNodes[0].ChildNodes[0].Attributes["id"].Value))
@@ -126,5 +160,7 @@ namespace MusicBrainzAPI.Domain
             };
             return songArtist;
         }
+
+        #endregion
     }
 }

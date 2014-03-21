@@ -45,7 +45,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="AudioObjects\Album.cs" />
     <Compile Include="Domain\BaseDomainObject.cs" />
-    <Compile Include="Domain\IGetServices.cs" />
+    <Compile Include="Domain\IServices.cs" />
     <Compile Include="Domain\Recording.cs" />
     <Compile Include="Domain\Release.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
