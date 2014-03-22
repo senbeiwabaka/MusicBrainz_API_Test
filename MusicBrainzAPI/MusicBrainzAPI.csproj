@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="AudioObjects\Artist.cs" />
     <Compile Include="AudioObjects\Song.cs" />
+    <Compile Include="AudioObjects\Track.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="AudioObjects\Album.cs" />
     <Compile Include="Domain\BaseDomainObject.cs" />

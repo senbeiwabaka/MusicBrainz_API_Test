@@ -18,7 +18,7 @@ namespace MusicBrainz_API_Test
 
             sw.Start();
 
-            recording.SearchGet(string.Empty, "\"right side of the bed\"");
+            recording.SearchGet(string.Empty, "\"right side of the bed\" AND artist:Atreyu AND release:the curse");
 
             sw.Stop();
 

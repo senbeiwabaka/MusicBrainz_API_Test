@@ -122,25 +122,59 @@ namespace MusicBrainzAPI.Domain
                         case "status":
                             album.Status = (Status)Enum.Parse(typeof(Status), releaseElement.InnerText);
                             break;
+                        case "artist-credit":
+                            Artist artist = new Artist(Guid.Parse(releaseElement.ChildNodes[0].ChildNodes[0].Attributes["id"].Value))
+                            {
+                                ArtistName = releaseElement.ChildNodes[0].ChildNodes[0].ChildNodes[0].ChildNodes[0].Value.Trim()
+                            };
+
+                            album.Artists.Add(artist);
+                            break;
                         case "release-group":
 
                             break;
                         case "date":
-                            //album.ReleasedDate = DateTime.Parse(release.InnerText);
+                            try
+                            {
+                                album.ReleasedDate = DateTime.Parse(release.InnerText);
+                            }
+                            catch { }
                             break;
                         case "country":
-                            album.Country = releaseElement.InnerText;
+                            album.Country = releaseElement.InnerText.Trim();
                             break;
                         case "medium-list":
+                            foreach (XmlElement mediumList in releaseElement.ChildNodes)
+                            {
+                                if (mediumList.Name.Trim().Equals("track-count", StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    album.TrackCount = Convert.ToByte(mediumList.InnerText);
+                                }
+                                else if (mediumList.Name.Trim().Equals("medium", StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    foreach (XmlElement medium in mediumList.ChildNodes)
+                                    {
+                                        switch (medium.Name.Trim().ToLowerInvariant())
+                                        {
+                                            case "format":
+                                                album.Format = medium.InnerText.Trim();
+                                                break;
+                                            case "track-list":
+                                                XmlDocument trackList = new XmlDocument();
+                                                trackList.LoadXml(medium.InnerXml);
+
+                                                Console.WriteLine(trackList);
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
                             break;
                         default:
                             break;
                     }
-                }
-
-                if (!string.IsNullOrEmpty(release.ChildNodes[1].InnerText))
-                {
-                    
                 }
 
                 song.Albums.Add(album);
