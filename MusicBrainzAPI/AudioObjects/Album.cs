@@ -51,6 +51,7 @@ namespace MusicBrainzAPI.AudioObjects
             Artists = new List<Artist>();
             PrimaryType = ReleaseType.None;
             SecondaryType = ReleaseType.None;
+            Tracks = new List<Track>();
         }
 
         public IList<Artist> Artists { get; set; }
@@ -76,6 +77,8 @@ namespace MusicBrainzAPI.AudioObjects
         public ReleaseType SecondaryType { get; set; }
 
         public int TrackPosition { get; set; }
+
+        public IList<Track> Tracks { get; set; }
 
         public override string ToString()
         {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Xml;
+using System.Xml.Serialization;
 
 namespace MusicBrainzAPI.Domain
 {
@@ -12,7 +13,7 @@ namespace MusicBrainzAPI.Domain
         private XmlDocument _xmlDocument = null;
 
         public IList<Song> Songs { get; set; }
-        
+
         public Recording()
         {
             Songs = new List<Song>();
@@ -72,7 +73,7 @@ namespace MusicBrainzAPI.Domain
                 Song song = new Song(Convert.ToInt32(recording.Attributes["ext:score"].Value), Guid.Parse(recording.Attributes["id"].Value))
                 {
                     SongTitle = recording.ChildNodes[0].InnerText.Trim(),
-                    
+
                 };
 
                 foreach (XmlElement element in recording.ChildNodes)
@@ -131,7 +132,20 @@ namespace MusicBrainzAPI.Domain
                             album.Artists.Add(artist);
                             break;
                         case "release-group":
-
+                            foreach (XmlElement releaseGroup in releaseElement)
+                            {
+                                switch (releaseGroup.Name.Trim().ToLowerInvariant())
+                                {
+                                    case "primary-type":
+                                        album.PrimaryType = (ReleaseType)Enum.Parse(typeof(ReleaseType), releaseGroup.InnerText.Trim());
+                                        break;
+                                    case "secondary-type-list":
+                                        album.SecondaryType = (ReleaseType)Enum.Parse(typeof(ReleaseType), releaseGroup.ChildNodes[0].InnerText.Trim());
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
                             break;
                         case "date":
                             try
@@ -160,10 +174,15 @@ namespace MusicBrainzAPI.Domain
                                                 album.Format = medium.InnerText.Trim();
                                                 break;
                                             case "track-list":
-                                                XmlDocument trackList = new XmlDocument();
-                                                trackList.LoadXml(medium.InnerXml);
 
-                                                Console.WriteLine(trackList);
+                                                XmlReader reader = XmlReader.Create(new StringReader(medium.InnerXml));
+                                                XmlSerializer ser = new XmlSerializer(typeof(Track));
+
+                                                Track track = (Track)ser.Deserialize(reader);
+
+                                                album.Tracks.Add(track);
+
+                                                reader.Close();
                                                 break;
                                             default:
                                                 break;
