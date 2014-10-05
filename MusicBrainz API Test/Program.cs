@@ -14,15 +14,30 @@ namespace MusicBrainz_API_Test
         {
             Recording recording = new Recording();
 
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            recording.SearchGet(string.Empty, "\"right side of the bed\" AND artist:atreyu AND release:the curse");
 
-            sw.Start();
+            int i = 0;
 
-            recording.SearchGet(string.Empty, "the & of");
+            long time = 0;
 
-            sw.Stop();
+            while (i < 10)
+            {
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
-            Console.WriteLine("Elapsed time in milliseconds: {0} ; For a total count of {1}", sw.ElapsedMilliseconds, recording.Songs.Count);
+                sw.Start();
+
+                Recording r = new Recording();
+
+                r.SearchGet(string.Empty, "\"right side of the bed\" AND artist:atreyu AND release:the curse");
+
+                sw.Stop();
+
+                time += sw.ElapsedMilliseconds;
+
+                ++i;
+            }
+
+            Console.WriteLine("Elapsed time in milliseconds: {0} ; For a total count of {1}", time / i, recording.Songs.Count);
 
             foreach (Song song in recording.Songs)
             {
